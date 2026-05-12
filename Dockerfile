@@ -14,7 +14,7 @@ RUN npm install --legacy-peer-deps --no-audit --no-fund
 
 RUN npx medusa build
 
-RUN cd /app/dist && npm install --omit=dev --no-audit --no-fund && npm cache clean --force
+RUN cd /app/dist && npm install --legacy-peer-deps --omit=dev --no-audit --no-fund && npm cache clean --force
 
 
 FROM node:22-alpine AS runtime
