@@ -12,16 +12,15 @@ COPY src ./src
 
 RUN npm install --legacy-peer-deps --no-audit --no-fund
 
-# Force fresh build run to see diagnostics
-ARG CACHE_BUST=v3
-RUN echo "BUST=${CACHE_BUST}" && npx medusa build 2>&1 | tee /tmp/build.log; \
-    echo "=== EXIT CODE: $? ===" && \
-    echo "=== /app contents ===" && ls -la /app && \
-    echo "=== /app/.medusa tree ===" && (find /app/.medusa -maxdepth 3 2>&1 | head -50 || echo "NO .medusa") && \
-    echo "=== /app/dist tree ===" && (find /app/dist -maxdepth 2 2>&1 | head -30 || echo "NO dist")
+ARG CACHE_BUST=v4
+RUN echo "BUST=${CACHE_BUST}" && npx medusa build && \
+    echo "=== /app/dist deep listing ===" && \
+    find /app/dist -maxdepth 5 -type f 2>&1 | head -100 && \
+    echo "=== /app/dist package.json ===" && cat /app/dist/package.json && \
+    echo "=== checking start script source ===" && (cat /app/dist/medusa-config.js | head -20 || true)
 
-# Continue only if .medusa/server exists
-RUN test -d /app/.medusa/server && cd /app/.medusa/server && npm install --omit=dev --no-audit --no-fund && npm cache clean --force || (echo "BUILD INCOMPLETE: .medusa/server missing" && exit 1)
+# dist/ is the actual build output (Medusa 2.13.6 with TS config)
+RUN cd /app/dist && npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 
 
 FROM node:22-alpine AS runtime
@@ -30,11 +29,11 @@ WORKDIR /app
 
 RUN apk add --no-cache tini libc6-compat curl
 
-COPY --from=builder /app/.medusa /app/.medusa
+COPY --from=builder /app/dist /app/dist
 COPY start.sh /app/start.sh
 
 RUN chmod +x /app/start.sh \
-    && mkdir -p /app/.medusa/server/static
+    && mkdir -p /app/dist/static
 
 ENV NODE_ENV=production
 ENV PORT=9000
