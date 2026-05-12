@@ -12,16 +12,16 @@ COPY src ./src
 
 RUN npm install --legacy-peer-deps --no-audit --no-fund
 
-RUN npx medusa build && \
-    echo "=== /app contents after build ===" && ls -la /app && \
-    echo "=== /app/.medusa contents (if exists) ===" && (ls -la /app/.medusa 2>/dev/null || echo "NO .medusa DIR") && \
-    echo "=== /app/dist contents (if exists) ===" && (ls -la /app/dist 2>/dev/null || echo "NO dist DIR")
+# Force fresh build run to see diagnostics
+ARG CACHE_BUST=v3
+RUN echo "BUST=${CACHE_BUST}" && npx medusa build 2>&1 | tee /tmp/build.log; \
+    echo "=== EXIT CODE: $? ===" && \
+    echo "=== /app contents ===" && ls -la /app && \
+    echo "=== /app/.medusa tree ===" && (find /app/.medusa -maxdepth 3 2>&1 | head -50 || echo "NO .medusa") && \
+    echo "=== /app/dist tree ===" && (find /app/dist -maxdepth 2 2>&1 | head -30 || echo "NO dist")
 
-RUN if [ -d /app/.medusa/server ]; then \
-      cd /app/.medusa/server && npm install --omit=dev --no-audit --no-fund && npm cache clean --force; \
-    else \
-      echo "ERROR: .medusa/server not produced by medusa build" && exit 1; \
-    fi
+# Continue only if .medusa/server exists
+RUN test -d /app/.medusa/server && cd /app/.medusa/server && npm install --omit=dev --no-audit --no-fund && npm cache clean --force || (echo "BUILD INCOMPLETE: .medusa/server missing" && exit 1)
 
 
 FROM node:22-alpine AS runtime
