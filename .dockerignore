@@ -1,0 +1,16 @@
+node_modules
+.medusa
+dist
+.cache
+.next
+.env
+.env.*
+*.log
+.git
+.gitignore
+.dockerignore
+.idea
+.vscode
+coverage
+Dockerfile
+README.md
