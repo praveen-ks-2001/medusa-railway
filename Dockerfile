@@ -12,14 +12,8 @@ COPY src ./src
 
 RUN npm install --legacy-peer-deps --no-audit --no-fund
 
-ARG CACHE_BUST=v4
-RUN echo "BUST=${CACHE_BUST}" && npx medusa build && \
-    echo "=== /app/dist deep listing ===" && \
-    find /app/dist -maxdepth 5 -type f 2>&1 | head -100 && \
-    echo "=== /app/dist package.json ===" && cat /app/dist/package.json && \
-    echo "=== checking start script source ===" && (cat /app/dist/medusa-config.js | head -20 || true)
+RUN npx medusa build
 
-# dist/ is the actual build output (Medusa 2.13.6 with TS config)
 RUN cd /app/dist && npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 
 
@@ -40,7 +34,7 @@ ENV PORT=9000
 
 EXPOSE 9000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=5 \
   CMD curl -fsS "http://127.0.0.1:${PORT:-9000}/health" || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
