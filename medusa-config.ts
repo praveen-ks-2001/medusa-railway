@@ -19,7 +19,11 @@ module.exports = defineConfig({
     },
   },
   admin: {
-    backendUrl: process.env.BACKEND_URL || "http://localhost:9000",
+    // Leave empty so the admin Vite bundle uses same-origin relative URLs.
+    // Setting an absolute fallback (e.g. http://localhost:9000) gets baked into
+    // the bundle at `medusa build` time and breaks production logins with
+    // "Failed to fetch" (mixed-content / cross-origin).
+    backendUrl: process.env.BACKEND_URL || "",
     disable: process.env.DISABLE_MEDUSA_ADMIN === "true",
   },
   modules: [
