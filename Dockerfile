@@ -14,7 +14,7 @@ RUN npm install --legacy-peer-deps --no-audit --no-fund
 
 RUN npx medusa build
 
-RUN cd /app/dist && npm install --legacy-peer-deps --omit=dev --no-audit --no-fund && npm cache clean --force
+RUN cd /app/.medusa/server && npm install --legacy-peer-deps --omit=dev --no-audit --no-fund && npm cache clean --force
 
 
 FROM node:22-alpine AS runtime
@@ -23,11 +23,11 @@ WORKDIR /app
 
 RUN apk add --no-cache tini libc6-compat curl
 
-COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/.medusa/server /app/.medusa/server
 COPY start.sh /app/start.sh
 
 RUN chmod +x /app/start.sh \
-    && mkdir -p /app/dist/static
+    && mkdir -p /app/.medusa/server/static
 
 ENV NODE_ENV=production
 ENV PORT=9000

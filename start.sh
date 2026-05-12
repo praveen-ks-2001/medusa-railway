@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-cd /app/dist
+cd /app/.medusa/server
 
 echo "[start] Running database migrations..."
 npx medusa db:migrate || {

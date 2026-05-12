@@ -10,7 +10,7 @@
     "strict": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
+    "outDir": "./.medusa/server",
     "rootDir": "./",
     "jsx": "react-jsx",
     "baseUrl": ".",
@@ -19,5 +19,5 @@
     "sourceMap": false
   },
   "include": ["src", "medusa-config.ts"],
-  "exclude": ["dist", ".medusa", "node_modules"]
+  "exclude": [".medusa", "node_modules"]
 }
